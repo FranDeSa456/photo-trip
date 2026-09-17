@@ -4,7 +4,7 @@ using PhotoTrip.DAL.Entities;
 
 namespace PhotoTrip.DAL.Repositories
 {
-    internal class PlaceRepository(PhotoDbContext context)
+    public class PlaceRepository(PhotoDbContext context)
     {
         private readonly DbSet<Place> _dbSet = context.Set<Place>();
 

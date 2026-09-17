@@ -2,7 +2,7 @@
 
 namespace PhotoTrip.DAL.Repositories.Interfaces
 {
-    internal interface IPlaceRepository
+    public interface IPlaceRepository
     {
         Task<Place?> GetByIdAsync(int Id, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Place?>> GetAllAsync(CancellationToken cancellationToken = default);
