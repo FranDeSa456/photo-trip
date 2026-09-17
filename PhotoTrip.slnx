@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PhotoTrip.BLL/PhotoTrip.BLL.csproj" />
+  <Project Path="PhotoTrip.DAL/PhotoTrip.DAL.csproj" Id="8bfb522b-6922-47bb-a84b-9df3784b65cd" />
+  <Project Path="PhotoTrip.PL.API/PhotoTrip.PL.API.csproj" Id="6c110918-fc3b-4d5f-9982-51832e2271a4" />
+  <Project Path="PhotoTrip.PL.MVC/PhotoTrip.PL.MVC.csproj" Id="aaa74222-facc-4842-9ba4-49fa8bf9b2ac" />
+</Solution>

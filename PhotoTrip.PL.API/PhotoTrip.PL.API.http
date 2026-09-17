@@ -1,0 +1,6 @@
+@PhotoTrip.PL.API_HostAddress = http://localhost:5007
+
+GET {{PhotoTrip.PL.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
