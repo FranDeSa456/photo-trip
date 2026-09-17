@@ -2,7 +2,7 @@
 
 namespace PhotoTrip.BLL.Services.Interfaces
 {
-    internal interface IPlaceService
+    public interface IPlaceService
     {
         Task<PlaceModel?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<PlaceModel>> GetAllAsync(CancellationToken cancellationToken = default);
