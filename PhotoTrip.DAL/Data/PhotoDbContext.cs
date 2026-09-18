@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PhotoTrip.DAL.Entities;
 
 namespace PhotoTrip.DAL.Data
 {
