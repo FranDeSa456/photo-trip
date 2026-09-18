@@ -9,5 +9,6 @@
         public Region Region { get; set; } = null!;
         public string ImageUrl { get; set; } = string.Empty;
         public string ThumbnailUrl { get; set; } = string.Empty;
+        public ICollection<Review> Reviews { get; set; } = [];
     }
 }
