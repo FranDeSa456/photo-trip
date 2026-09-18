@@ -1,0 +1,16 @@
+<main class="container">
+  <h1>PhotoTrip</h1>
+  <h2>Regioni</h2>
+
+  @if (loadFailed()) {
+    <p class="error">Impossibile caricare le regioni. Verifica che le Azure Functions siano attive su http://localhost:7071.</p>
+  } @else {
+    <ul>
+      @for (region of regions(); track region.id) {
+        <li>{{ region.name }}</li>
+      } @empty {
+        <li>Nessuna regione disponibile.</li>
+      }
+    </ul>
+  }
+</main>

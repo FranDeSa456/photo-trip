@@ -14,7 +14,7 @@ namespace PhotoTrip.Functions.Functions
 
         [Function("GetRegions")]
         public async Task<HttpResponseData> GetRegions(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "regioni")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "regions")] HttpRequestData req)
         {
             var regions = await _regionService.GetAllAsync();
 
