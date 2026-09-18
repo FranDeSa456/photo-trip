@@ -3,7 +3,8 @@
 > Piattaforma di scoperta turistica organizzata per regione: luoghi con foto e recensioni della community.
 > Progetto scolastico backend, team di 3 persone, durata 2 settimane.
 >
-> Questo README funge da specifica di riferimento per lo sviluppo (utilizzabile come contesto per assistenti AI, es. opencode). Rispecchia le decisioni prese in fase di progettazione: tenerlo aggiornato se l'ambito cambia.
+> Questo README funge da specifica di riferimento per lo sviluppo.
+> Rispecchia le decisioni prese in fase di progettazione: tenerlo aggiornato se l'ambito cambia.
 
 ## 1. Panoramica
 

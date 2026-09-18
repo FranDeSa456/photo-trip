@@ -28,7 +28,7 @@ builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<IPlaceService, PlaceService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
-builder.Services.AddAutoMapper(cfg => { }, typeof(IPlaceService).Assembly);
+builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly, typeof(IPlaceService).Assembly);
 
 builder.Services.AddSingleton(_ =>
     new BlobServiceClient(Environment.GetEnvironmentVariable("AzureWebJobsStorage")));
