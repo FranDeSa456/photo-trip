@@ -10,4 +10,10 @@
     <ProjectReference Include="..\PhotoTrip.BLL\PhotoTrip.BLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Reviews\" />
+    <Folder Include="Views\Places\" />
+    <Folder Include="Views\Regions\" />
+  </ItemGroup>
+
 </Project>
