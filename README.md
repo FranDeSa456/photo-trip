@@ -42,6 +42,8 @@ Azure Functions (HTTP trigger)
                           container "luoghi-thumbnail"
 ```
 
+> **Nota:** **tutte** le chiamate API sono esposte tramite Azure Functions (HTTP trigger): non ci sono controller ASP.NET Core per l'API. (Il requisito era usare almeno una Function; il team ha deciso di usare Functions per tutti gli endpoint, confermato con il prof.)
+
 Flusso tipico di creazione di un luogo:
 1. Il client invia `POST /api/luoghi` con i dati del luogo e il file immagine.
 2. La Function salva l'immagine originale nel container `luoghi-originali` e crea il record `Luogo` nel database con l'URL dell'immagine.
@@ -102,6 +104,7 @@ Queste sono le funzionalità da implementare. Non aggiungere altro senza discute
 - Creazione di un luogo (nome, descrizione, regione di appartenenza, foto).
 - Lettura del dettaglio di un singolo luogo (inclusa valutazione media e numero di recensioni).
 - Elenco dei luoghi, filtrabile per regione.
+- Cancellazione di un luogo (le recensioni associate vengono eliminate a cascata dal DB).
 
 ### 5.3 Foto e Blob Storage
 - Upload della foto originale del luogo su Blob Storage, salvataggio dell'URL nel database.
@@ -111,6 +114,7 @@ Queste sono le funzionalità da implementare. Non aggiungere altro senza discute
 - Aggiunta di una recensione a un luogo (nome autore libero, testo, voto 1-5).
 - Elenco delle recensioni di un luogo.
 - Calcolo della valutazione media di un luogo (calcolata al volo nella query, non serve un campo salvato).
+- Cancellazione di una recensione.
 
 ## 6. Contratto API
 
@@ -124,6 +128,8 @@ Tutte le route sono sotto `/api`. Payload e risposte in JSON, tranne l'upload fo
 | POST | `/api/luoghi` | Crea un luogo | `multipart/form-data`: `nome`, `descrizione`, `regioneId`, `foto` (file) | `201` → luogo creato · `400` se validazione fallisce |
 | GET | `/api/luoghi/{luogoId}/recensioni` | Recensioni di un luogo | — | `200` → `[{ id, nomeAutore, testo, voto, data }]` |
 | POST | `/api/luoghi/{luogoId}/recensioni` | Aggiunge una recensione | `{ nomeAutore, testo, voto }` | `201` → recensione creata · `400` se validazione fallisce · `404` se il luogo non esiste |
+| DELETE | `/api/luoghi/{id}` | Cancella un luogo (e le sue recensioni, a cascata) | — | `204` · `404` se non esiste |
+| DELETE | `/api/luoghi/{luogoId}/recensioni/{recensioneId}` | Cancella una recensione | — | `204` · `404` se non esiste |
 
 ### Regole di validazione
 - `nome` (luogo): obbligatorio, max 100 caratteri.
