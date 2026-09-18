@@ -156,8 +156,6 @@ Tutte le route sono sotto `/api`. Payload e risposte in JSON, tranne l'upload fo
     Regione.cs
     Luogo.cs
     Recensione.cs
-  /Dto
-    LuogoDto.cs, RecensioneDto.cs, ...
   /Data
     AppDbContext.cs
     /Migrations
