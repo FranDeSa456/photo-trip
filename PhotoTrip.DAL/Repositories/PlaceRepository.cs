@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PhotoTrip.DAL.Data;
 using PhotoTrip.DAL.Entities;
+using PhotoTrip.DAL.Repositories.Interfaces;
 
 namespace PhotoTrip.DAL.Repositories
 {
-    public class PlaceRepository(PhotoDbContext context)
+    public class PlaceRepository(PhotoDbContext context) : IPlaceRepository
     {
         private readonly DbSet<Place> _dbSet = context.Set<Place>();
 
