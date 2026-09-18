@@ -10,7 +10,7 @@
 
 Gli utenti esplorano regioni, ognuna delle quali raccoglie una serie di luoghi turistici. Ogni luogo ha una foto, una descrizione e delle recensioni lasciate liberamente (senza login) dagli utenti, con voto da 1 a 5.
 
-Obiettivo didattico: dimostrare l'uso integrato di Azure Functions, Azure Blob Storage, di un database relazionale gestito con Entity Framework Core e di un front-end Angular.
+Obiettivo didattico: dimostrare l'uso integrato di Azure Functions, Azure Blob Storage, di un database relazionale gestito con Entity Framework Core e di un front-end MVC (Razor views).
 
 ## 2. Stack tecnologico
 
@@ -22,13 +22,13 @@ Obiettivo didattico: dimostrare l'uso integrato di Azure Functions, Azure Blob S
 | Database | Database relazionale via EF Core | Azure SQL Database |
 | ORM | Entity Framework Core | Migration per lo schema, `AddDbContext` in DI |
 | Emulazione locale storage | Azurite | evita di consumare risorse Azure reali durante lo sviluppo |
-| Front-end | Angular (standalone) | progetto `PhotoTrip.PL.ANGULAR`, consuma le Functions via HTTP |
+| Front-end | ASP.NET Core MVC (Razor views) | progetto `PhotoTrip.PL.MVC`, consuma le Functions via HttpClient |
 
 ## 3. Architettura
 
 ```
-Angular (PhotoTrip.PL.ANGULAR)
-        │  HTTP (proxy dev su localhost:7071)
+MVC (PhotoTrip.PL.MVC)
+        │  HTTP (HttpClient verso localhost:7071)
         ▼
 Azure Functions (HTTP trigger)
         │                     │
@@ -44,10 +44,10 @@ Azure Functions (HTTP trigger)
                          container "places-thumbnails"
 ```
 
-> **Nota:** **tutte** le chiamate API sono esposte tramite Azure Functions (HTTP trigger): non ci sono controller ASP.NET Core per l'API, né sul front-end (nessun MVC). (Il requisito era usare almeno una Function; il team ha deciso di usare Functions per tutti gli endpoint, confermato con il prof.)
+> **Nota:** **tutte** le chiamate API sono esposte tramite Azure Functions (HTTP trigger): non ci sono controller ASP.NET Core per l'API, il front-end MVC è solo un client HTTP verso le Functions. (Il requisito era usare almeno una Function; il team ha deciso di usare Functions per tutti gli endpoint, confermato con il prof.)
 
 Flusso tipico di creazione di un luogo:
-1. Il client Angular invia `POST /api/places` con i dati del luogo e il file immagine.
+1. Il client MVC invia `POST /api/places` con i dati del luogo e il file immagine.
 2. La Function salva l'immagine originale nel container `places-originals` e crea il record `Place` nel database con l'URL dell'immagine.
 3. Il salvataggio del blob attiva automaticamente una Function che genera una thumbnail e la salva nel container `places-thumbnails`.
 4. (Facoltativo, se semplice da implementare) la Function di thumbnail aggiorna il campo `ThumbnailUrl` del `Place` corrispondente nel database.
@@ -118,10 +118,11 @@ Queste sono le funzionalità da implementare. Non aggiungere altro senza discute
 - Calcolo della valutazione media di un luogo (calcolata al volo nella query, non serve un campo salvato).
 - Cancellazione di una recensione.
 
-### 5.5 Front-end (Angular)
-- App Angular in `PhotoTrip.PL.ANGULAR`, unica interfaccia utente del progetto (sostituisce il vecchio progetto MVC).
-- Consuma esclusivamente le Azure Functions via HTTP; nessun accesso diretto a DB o BLL.
-- In sviluppo usa il proxy del dev server verso `http://localhost:7071` (vedi `proxy.conf.json`), quindi nessuna configurazione CORS in locale; in Azure va configurato CORS sul Function App.
+### 5.5 Front-end (MVC)
+- Front-end in `PhotoTrip.PL.MVC`: Razor views + HTML/CSS basic (Bootstrap incluso nel template), interfaccia utente del progetto.
+- Consuma esclusivamente le Azure Functions via HttpClient; nessun accesso diretto a DB o BLL (la BLL è referenziata solo per riusare i modelli `RegionModel`/`PlaceModel`/`ReviewModel` deserializzati dalle risposte API).
+- HttpClient tipizzato registrato in `Program.cs` con base URL delle Functions da `appsettings.json`.
+- CRUD completo su regioni, luoghi e recensioni; struttura per convenzione: `Controllers/<Nome>Controller.cs` → `Views/<Nome>/<Action>.cshtml`.
 
 ## 6. Contratto API
 
@@ -153,8 +154,7 @@ PhotoTrip.slnx
   PhotoTrip.DAL/            # entità, DbContext, Repository + UnitOfWork
   PhotoTrip.BLL/            # servizi + modelli, AutoMapper
   PhotoTrip.Functions/      # API (HTTP trigger) + Blob Trigger thumbnail
-  PhotoTrip.PL.ANGULAR/     # front-end Angular (fuori dalla solution .NET)
-  PhotoTrip.PL.MVC/         # DEPRECATO: da rimuovere previo accordo del team
+  PhotoTrip.PL.MVC/         # front-end MVC (Razor views), consuma le Functions via HttpClient
 ```
 
 Dettaglio `PhotoTrip.Functions`:
@@ -171,19 +171,27 @@ local.settings.json              # NON committare: contiene connection string lo
   MappingProfile.cs              # profilo AutoMapper
 ```
 
-Dettaglio `PhotoTrip.PL.ANGULAR`:
+Dettaglio `PhotoTrip.PL.MVC`:
 ```
-proxy.conf.json                  # proxy dev /api → localhost:7071
-src/environments/environment*.ts # apiBaseUrl
-src/app/models/                  # interfacce TypeScript dei modelli API
-src/app/services/                # client HTTP verso le Functions
+Program.cs                       # setup DI + HttpClient tipizzato verso le Functions
+appsettings.json                 # base URL delle Functions
+Controllers/
+  RegionsController.cs           # Index, Details (luoghi della regione), Create/Edit/Delete
+  PlacesController.cs            # Index, Details (con recensioni), Create/Edit/Delete
+  ReviewsController.cs           # Create/Delete per un luogo
+Views/
+  Regions/Index.cshtml, Regions/Details.cshtml, ... (una view per ogni action)
+  Places/Index.cshtml, Places/Details.cshtml, ...
+  Reviews/Create.cshtml, ...
+  Shared/_Layout.cshtml          # layout comune (nav, CSS)
+Models/                          # quasi vuoto: si riusano i modelli BLL
 ```
 
 ### Backend a layer
 L'applicazione NON deve usare il pattern DTO. Utilizzeremo direttamente i Model di dominio e di entità condivisi tra le sezioni dell'applicazione. La struttura deve seguire la separazione a tre livelli:
 - Data Access Layer (DAL): Gestione persistenza Microsoft SQL Server, Repository Pattern, DbContext (Entity Framework Core o Dapper), migrazioni e interazione raw con Microsoft SQL Server.
 - Business Logic Layer (BLL): entità e logica di normalizzazione dati grezzi.
-- Presentation Layer / API (PL): Azure Functions API per esporre le funzionalità; Angular per l'interfaccia utente.
+- Presentation Layer / API (PL): Azure Functions API per esporre le funzionalità; MVC con Razor views per l'interfaccia utente.
 
 ## 8. Fuori scope per ora (da valutare solo se avanza tempo)
 
@@ -193,7 +201,7 @@ Non implementare queste funzionalità finché l'MVP non è completo e testato:
 
 ## 9. Setup ambiente di sviluppo
 
-1. Installare Azure Functions Core Tools v4, .NET SDK (versione ≥ 8) e Node.js LTS (≥ 20).
+1. Installare Azure Functions Core Tools v4 e .NET SDK (versione ≥ 8).
 2. Installare e avviare **Azurite** per emulare il Blob Storage in locale.
 3. Predisporre un'istanza SQL Server locale (LocalDB o container Docker).
 4. Copiare un `local.settings.json` in `PhotoTrip.Functions/` con:
@@ -209,7 +217,7 @@ Non implementare queste funzionalità finché l'MVP non è completo e testato:
    ```
 5. Applicare le migration: `dotnet ef migrations add <Nome> --project PhotoTrip.DAL --startup-project PhotoTrip.Functions`, poi `dotnet ef database update --project PhotoTrip.DAL --startup-project PhotoTrip.Functions`.
 6. Avviare le Function in locale: `func start` dentro `PhotoTrip.Functions/`.
-7. Avviare il front-end: `npm install && npm start` dentro `PhotoTrip.PL.ANGULAR/`, poi aprire `http://localhost:4200`.
+7. Avviare il front-end: `dotnet run` dentro `PhotoTrip.PL.MVC/` (richiede le Functions attive), poi aprire l'URL indicato nella console.
 
 ## 10. Team e roadmap (2 settimane)
 
@@ -220,7 +228,7 @@ Non implementare queste funzionalità finché l'MVP non è completo e testato:
 | C | Integrazione Blob Storage, Blob Trigger per le thumbnail, test end-to-end |
 
 **Settimana 1:** setup del progetto e del repo, database e prime migration, endpoint CRUD di base (regioni, luoghi).
-**Settimana 2:** integrazione Blob Storage e trigger thumbnail, recensioni e valutazione media, front-end Angular, test end-to-end e rifinitura per la demo.
+**Settimana 2:** integrazione Blob Storage e trigger thumbnail, recensioni e valutazione media, front-end MVC (Razor views), test end-to-end e rifinitura per la demo.
 
 ## 11. Note
 
