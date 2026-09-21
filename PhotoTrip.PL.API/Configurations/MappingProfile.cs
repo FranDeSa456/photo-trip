@@ -1,8 +1,8 @@
-using AutoMapper;
+﻿using AutoMapper;
 using PhotoTrip.BLL.Models;
 using PhotoTrip.DAL.Entities;
 
-namespace PhotoTrip.Functions.Configurations
+namespace PhotoTrip.PL.API.Configurations
 {
     public class MappingProfile : Profile
     {
